@@ -55,27 +55,23 @@ Standard OpenNebula datastore operations:
 Optional:
 
 * Set limit on the number of VM disk snapshots (per disk limits).
-* Helper tool to migrate CONTEXT ISO image to StorPool backed volume (require ``SYSTEM_DS`` `TM_MAD=storpool`).
 * Send volume snapshot to a remote StorPool cluster on image deletion.
-* Alternate local kvm/deploy script replacement, which allows [tweaks](docs/deploy_tweaks.md) to the domain XML of the VMs with helper tools to enable iothreads, ioeventfd, fix virtio-scsi ``nqueues`` to match the number of VCPUs, set cpu-model, and so on.
+* Alternate local kvm/deploy script replacement, which allows [tweaks](docs/deploy_tweaks.md) to the domain XML of the VMs with various helper tools like fix virtio-scsi ``nqueues`` to match the number of VCPUs, and so on.
 * Support VM checkpoint file stored directly on a StorPool backed block device (see the limitations).
 * Replace the "VM snapshot" interface scripts to do atomic disk snapshots on StorPool with the option to set a limit on the number of snapshots per VM (see limitations).
-* Replace the <devices/video> element in the domain XML.
 * Support for [UEFI Normal/Secure boot](docs/uefi_boot.md) with persistent UEFI NVRAM stored on a StorPool backed block device.
 * Support CDROM hotplug.
-* Use CPU tune parameters instead/or in addition/ of CPU shares.
 
 
 
 ## Limitations
 
-* OpenNebula temporarily keeps the VM checkpoint file on the Host and then (optionally) transfers it to the storage. A workaround was added on the base of OpenNebula/one#3272.
+* OpenNebula temporarily keeps the VM checkpoint file on the Host and then (optionally) transfers it to the storage. A workaround was added on the base of [OpenNebula 3272](https://github.com/OpenNebula/one/issues/3272).
 * When SYSTEM datastore integration is enabled, the reported free/used/total space of the Datastore is the space on StorPool. (On the host filesystem there are mostly symlinks and small files that do not require much disk space).
 * VM snapshotting is not possible because it is handled internally by libvirt, which does not support RAW disks. It is possible to reconfigure the 'VM snapshot' interface of OpenNebula to do atomic disk snapshots in a single StorPool transaction when only StorPool backed datastores are used.
 * Only FULL OpenNebula backups are supported.
-* Persistent Images with SHAREABLE attribute are not supported.
-* Persistent Images with IMMUTABLE attribute are not supported.
-* Tested only with KVM hypervisor and Alma Linux 8/Ubuntu 24.04. Should work on other Linux OS.
+* Persistent Images with SHAREABLE or IMMUTABLE attribute are not supported.
+* Tested only with KVM hypervisor and Alma Linux/Ubuntu. Should work on other Linux OS.
 * The UEFI auto configuration is not supported.
 
 ## Development
@@ -113,8 +109,7 @@ The OpenNebula add-on module by StorPool flows OpenNebula storage requests direc
 
 ### How does StorPool handle redundancy and replication in OpenNebula?
 
-StorPool is [more reliable than storage RAID](https://storpool.com/advantages/more-reliable-than-raid).
-It provides two mechanisms for protecting data from unplanned events: replication and erasure coding.
+StorPool provides two mechanisms for protecting data from unplanned events: replication and erasure coding.
 With replication, a few copies of the data are written synchronously across the Cluster in different physical servers; system administrators can set the number of replication copies.
 The [erasure coding](https://kb.storpool.com/admin-guide/redundancy.html#erasure-coding) mechanism reduces the amount of data stored on the same hardware set, while at the same time preserves the level of data protection.
 
@@ -123,10 +118,10 @@ The [erasure coding](https://kb.storpool.com/admin-guide/redundancy.html#erasure
 Yes, StorPool Storage includes built-in disaster recovery (DR) capabilities with its [Disaster Recovery Engine](https://kb.storpool.com/disaster-recovery/index.html) (included at no additional cost).
 Users can configure snapshot replication policies on a per-VM basis, test automated failover, and execute actual failover procedures.
 
-### How do StorPool and OpenNebula help eliminate vendor lock-in and reduce hardware costs?
+### How do StorPool and OpenNebula help reduce hardware costs?
 
-The solution is designed to drastically reduce vendor lock-in.
-StorPool supports the use of cost-efficient commodity hardware and leverages common open-source software.
+StorPool supports the use of cost-efficient [commodity hardware](https://storpool.com/advantages/san-storage-arrays-and-all-flash-arrays-too-expensive) and leverages common open-source software.
+As a result, hardware costs for cloud solutions based on StorPool are reduced drastically.
 Customers can leverage or reuse existing hardware.
 
 ### How does StorPool minimize downtime and maintenance windows in an OpenNebula cloud?
@@ -138,12 +133,16 @@ Such an integrated solution is crucial for enterprise clouds, which demand extre
 ### What is the operational advantage of using OpenNebula with the managed storage platform provided by StorPool?
 
 Operational overhead is minimized because a team of experts at StorPool handles the deployment, management, and updating of the storage infrastructure.
-Thanks to StorPool driver's efficiency, everyday tasks such as volume creation, snapshots, cloned provisioning, and restores you perform using the user interface of OpenNebula are performed instantly.
 
 ### Is it possible to make instant snapshots via the OpenNebula GUI interface?
 
-Making instant snapshots is supported. You need to replace the default libvirt snapshot scripts with the atomic driver scripts included in the StorPool addon.
+Making instant snapshots is supported. You need to reconfigure the default OpenNebula VM snapshot function to use  the atomic driver scripts included in the StorPool addon.
 For details, see the Limitations section.
+
+### Is it possible to retain data for a period of time?
+
+Sometimes there are government/regulation requirements to keep customer data for a given period of time after the termination of the contract.
+You can do this by setting your system to send volume snapshot to a remote StorPool cluster on image deletion.
 
 ### Is the StorPool OpenNebula driver actively maintained?
 
