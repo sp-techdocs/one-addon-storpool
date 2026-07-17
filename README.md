@@ -134,11 +134,6 @@ Such an integrated solution is crucial for enterprise clouds, which demand extre
 
 Operational overhead is minimized because a team of experts at StorPool handles the deployment, management, and updating of the storage infrastructure.
 
-### Is it possible to make instant snapshots via the OpenNebula GUI interface?
-
-Making instant snapshots is supported. You need to reconfigure the default OpenNebula VM snapshot function to use  the atomic driver scripts included in the StorPool addon.
-For details, see the Limitations section.
-
 ### Is it possible to retain data for a period of time?
 
 Sometimes there are government/regulation requirements to keep customer data for a given period of time after the termination of the contract.
